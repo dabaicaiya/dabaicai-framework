@@ -1,5 +1,6 @@
 package com.dabaicai.framework.orm.mybatis;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 /**
@@ -26,6 +27,20 @@ public class BuildQueryWrapperUtils {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
         buildQueryWrapper.build(t, queryWrapper, doClass);
         return queryWrapper;
+    }
+
+    /**
+     * 构建一个Lambda查询器
+     *
+     * @param <T>
+     * @param t 请求参数
+     * @param doClass do实体类
+     * @return 查询构造器
+     */
+    public static <T> LambdaQueryWrapper<T> buildLambda(T t, Class<?> doClass) {
+        QueryWrapper<T> queryWrapper = new QueryWrapper<>();
+        buildQueryWrapper.build(t, queryWrapper, doClass);
+        return queryWrapper.lambda();
     }
 
 }
