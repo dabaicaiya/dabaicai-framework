@@ -3,20 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>dabaicai-framework</artifactId>
+        <artifactId>dabaicai-netty</artifactId>
         <groupId>com.dabaicai.framework</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dabaicai-netty</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>dabaicai-netty-common</module>
-        <module>dabaicai-netty-rpc-client</module>
-        <module>dabaicai-netty-rpc-server</module>
-        <module>dabaicai-netty-rpc-login</module>
-    </modules>
+    <artifactId>dabaicai-netty-common</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
