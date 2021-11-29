@@ -12,6 +12,7 @@
         <module>dabaicai-common</module>
         <module>dabaicai-netty</module>
         <module>dabaicai-orm</module>
+        <module>dabaicai-logger</module>
     </modules>
 
     <properties>
