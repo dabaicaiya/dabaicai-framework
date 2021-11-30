@@ -1,12 +1,5 @@
-package com.dabaicai.framework.netty.server.ioc;
+package com.dabaicai.framework.common.beans;
 
-/**
- * @Title:
- * @Package
- * @Description: 类扫描
- * @编写人： 张艳兵
- * @时间： 2020/7/11 23:26
- */
 
 
 import java.io.File;
@@ -20,6 +13,11 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * @author zhangyanbing
+ * @Description 类扫描
+ * @date 2020/7/11 23:26
+ */
 public abstract class PackageScanner {
 
     /**

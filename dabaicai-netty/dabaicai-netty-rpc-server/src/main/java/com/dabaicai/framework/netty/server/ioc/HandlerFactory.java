@@ -1,9 +1,11 @@
 package com.dabaicai.framework.netty.server.ioc;
 
 import com.dabaicai.framework.netty.bean.RpcMessage;
+import com.dabaicai.framework.netty.utils.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,21 +36,14 @@ public class HandlerFactory {
         AppContext appContext = AppContext.getAppContext();
         List<HandlerBean> handlerList = appContext.getHandlerList();
         for (HandlerBean handlerBean : handlerList) {
-            String newBaseUrl = "";
-            String baseUrl = handlerBean.getBaseUrl();
-            if (baseUrl != null && baseUrl.length() > 0) {
-                if (handlerBean.getBaseUrl().charAt(0) != '/') {
-                    newBaseUrl += "/";
-                }
-                newBaseUrl += baseUrl;
-            }
             // 处理器
             Object handler = handlerBean.getHandler();
             Method[] handlerMethods = handler.getClass().getDeclaredMethods();
             for (Method handlerMethod : handlerMethods) {
                 RpcHandler rpcHandlerBean = new RpcHandler();
                 rpcHandlerBean.setHandlerBean(handlerBean);
-                rpcHandlerBean.setUrl(newBaseUrl + "/" + handlerMethod.getName());
+                String url = UrlUtils.generateUrl(handlerBean.getBaseUrl(), handlerMethod.getName());
+                rpcHandlerBean.setUrl(url);
                 rpcHandlerBean.setHandlerMethod(handlerMethod);
                 rpcHandlerFactory.put(rpcHandlerBean.getUrl(), rpcHandlerBean);
             }

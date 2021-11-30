@@ -1,5 +1,6 @@
 package com.dabaicai.framework.netty.server.ioc;
 
+import com.dabaicai.framework.common.beans.PackageScanner;
 import com.dabaicai.framework.netty.annotation.Handler;
 import com.dabaicai.framework.netty.annotation.Request;
 
@@ -70,22 +71,6 @@ public class AppContext {
         return handlerList;
     }
 
-    /**
-     * 扫描处理器
-     * @return
-     */
-    public Map<String, Object> scanResponse() {
-        Map<String, Object> map = new HashMap<>();
-        List<Class<? extends Annotation>> classes = Arrays.asList(Request.class);
-        new PackageScanner(basePackage, classes) {
-            @Override
-            public void dealClass(Class<?> klass) {
-                map.put(klass.getName(), Proxy.newProxyInstance(klass.getClassLoader(),
-                        new Class[]{klass}, new ResponseProxy()));
-            }
-        }.packageScan();
-        return map;
-    }
 
 
     public List<HandlerBean> getHandlerList() {

@@ -5,11 +5,9 @@ import com.dabaicai.framework.common.utils.IntUtils;
 import com.dabaicai.framework.netty.bean.RpcMessage;
 import com.dabaicai.framework.netty.enums.NettyMessageType;
 import com.dabaicai.framework.netty.server.ioc.HandlerFactory;
-import com.dabaicai.framework.netty.server.ioc.RpcHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 
@@ -38,6 +36,9 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
         int messageType = IntUtils.byteArrayToInt(bytesMessage, true);
         // 获取消息类型
         NettyMessageType nettyMessageType = NettyMessageType.getEnumByKey(messageType);
+        if (nettyMessageType == null) {
+            return;
+        }
         switch (nettyMessageType) {
             case RPC: {
                 String message = new String(bytesMessage, 4, bytesMessage.length - 4);
@@ -75,7 +76,7 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
     private void invokeResponse(ChannelHandlerContext ctx, RpcMessage reqMessage, Object response) {
         // 发送响应信息
         RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setUrl(reqMessage.getUrl() + "#Response");
+        rpcMessage.setUrl(reqMessage.getUrl() + "#response");
         rpcMessage.setData(JSONObject.toJSONString(response));
         byte[] messageType = IntUtils.intToByteLittle(NettyMessageType.RPC.getKey());
         byte[] bytes = JSONObject.toJSONString(rpcMessage).getBytes(StandardCharsets.UTF_8);
