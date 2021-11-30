@@ -1,7 +1,6 @@
-package com.dabaicai.framework.common.base;
+package com.dabaicai.framework.orm.common.base;
 
 
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author zhangyanbing
@@ -10,10 +9,8 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class BasePageQuery {
 
-    @ApiModelProperty(value = "起始页", position = 1)
     private Integer pageNum;
 
-    @ApiModelProperty(value = "页大小", position = 2)
     private Integer pageSize;
 
 

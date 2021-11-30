@@ -42,7 +42,7 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
             case RPC: {
                 String message = new String(bytesMessage, 4, bytesMessage.length - 4);
                 RpcMessage rpcMessage = JSONObject.parseObject(message, RpcMessage.class);
-                rpcChannelRead(ctx, rpcMessage.getUrl(), rpcMessage.getData());
+                rpcChannelRead(ctx, rpcMessage);
                 break;
             }
             case BYTE: {
@@ -55,27 +55,27 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
     /**
      * rpc 调用处理方法
      * @param ctx 请求的通道
-     * @param url 请求地址
-     * @param data 请求数据区域
      */
-    public void rpcChannelRead(ChannelHandlerContext ctx, String url, String data) {
-        if (StringUtils.isEmpty(url)) {
-            return;
-        }
-        // 不存在处理器
-        if (!handler.containsUrl(url)) {
-            return;
-        }
-        // 处理器
-        RpcHandler rpcHandlerBean = handler.get(url);
-        Object response = rpcHandlerBean.invokeMethod(data);
+    public void rpcChannelRead(ChannelHandlerContext ctx, RpcMessage reqMessage) {
+        // 处理请求
+        Object response = handler.invokeHandler(reqMessage);
         if (response == null) {
-            // 如果没有响应信息
             return;
         }
+        // 处理响应
+        invokeResponse(ctx, reqMessage, response);
+    }
+
+    /**
+     * 处理响应
+     * @param ctx
+     * @param reqMessage
+     * @param response
+     */
+    private void invokeResponse(ChannelHandlerContext ctx, RpcMessage reqMessage, Object response) {
         // 发送响应信息
         RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setUrl(url + "#Response");
+        rpcMessage.setUrl(reqMessage.getUrl() + "#Response");
         rpcMessage.setData(JSONObject.toJSONString(response));
         byte[] messageType = IntUtils.intToByteLittle(NettyMessageType.RPC.getKey());
         byte[] bytes = JSONObject.toJSONString(rpcMessage).getBytes(StandardCharsets.UTF_8);

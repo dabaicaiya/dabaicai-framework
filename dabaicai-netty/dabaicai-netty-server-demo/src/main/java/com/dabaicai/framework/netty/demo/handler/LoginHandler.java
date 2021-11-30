@@ -15,11 +15,13 @@ public class LoginHandler {
 
     public String login(LoginReq loginReq) {
         System.out.println(loginReq);
+        System.out.println("登录请求");
         return "success";
     }
 
     public String logout(LogoutReq loginReq) {
         System.out.println(loginReq);
+        System.out.println("退出登录请求");
         return "success";
     }
 }

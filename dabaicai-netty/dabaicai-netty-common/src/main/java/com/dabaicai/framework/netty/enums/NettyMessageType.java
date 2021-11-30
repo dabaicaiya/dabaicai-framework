@@ -16,7 +16,7 @@ import java.util.EnumSet;
  */
 @Getter
 @AllArgsConstructor
-public enum NettyMessageType  implements ICommonEnum {
+public enum NettyMessageType {
 
     /**
      * rpc远程调用

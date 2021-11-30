@@ -1,6 +1,9 @@
 package com.dabaicai.framework.orm.common;
 
 
+import com.dabaicai.framework.common.utils.cache.LruCache;
+import sun.misc.LRUCache;
+
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -11,7 +14,7 @@ import java.util.*;
  */
 public class FieldUtils {
 
-    private static Map<Class<?>, List<Field>> declaredFieldsCache = new HashMap();
+    private static Map<Class<?>, List<Field>> declaredFieldsCache = new LruCache<>(100);
 
     /**
      * 获取类的所有属性 包含父类的属性

@@ -9,27 +9,12 @@ import java.util.Map;
  * @author: zhangyanbing
  * Date: 2021/11/30 10:23
  */
-public class LruCache<K, V> {
 
-    private LinkedHashMap<K, V> linkedHashMap;
+public class LruCache<K, V> extends LinkedHashMap<K, V> {
 
-    public LruCache(int capacity) {
-        linkedHashMap = new CacheLinkedHashMap<K, V>(capacity);
-    }
-
-    public V get(K key) {
-        return linkedHashMap.get(key);
-    }
-
-    public void put(K key, V value) {
-        linkedHashMap.put(key, value);
-    }
-}
-
-class CacheLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
     private int capacity;
 
-    public CacheLinkedHashMap(int capacity) {
+    public LruCache(int capacity) {
         super(capacity, 0.75f, true);
         this.capacity = capacity;
     }

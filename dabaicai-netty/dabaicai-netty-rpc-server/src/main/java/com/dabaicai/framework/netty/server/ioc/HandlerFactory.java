@@ -1,5 +1,8 @@
 package com.dabaicai.framework.netty.server.ioc;
 
+import com.dabaicai.framework.netty.bean.RpcMessage;
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +53,25 @@ public class HandlerFactory {
                 rpcHandlerFactory.put(rpcHandlerBean.getUrl(), rpcHandlerBean);
             }
         }
+    }
+
+    /**
+     * 执行处理器
+     * @param reqMessage
+     * @return
+     */
+    public Object invokeHandler(RpcMessage reqMessage) {
+        String url = reqMessage.getUrl();
+        if (StringUtils.isEmpty(url)) {
+            return null;
+        }
+        // 不存在处理器
+        if (!this.containsUrl(url)) {
+            return null;
+        }
+        // 处理器
+        RpcHandler rpcHandlerBean = this.get(url);
+        return rpcHandlerBean.invokeMethod(reqMessage.getData());
     }
 
     public RpcHandler get(String url) {
