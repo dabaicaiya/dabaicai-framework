@@ -41,6 +41,7 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
         }
         switch (nettyMessageType) {
             case RPC: {
+                // RPC 调用
                 String message = new String(bytesMessage, 4, bytesMessage.length - 4);
                 RpcMessage rpcMessage = JSONObject.parseObject(message, RpcMessage.class);
                 rpcChannelRead(ctx, rpcMessage);

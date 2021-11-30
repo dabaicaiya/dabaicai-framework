@@ -17,7 +17,7 @@
         <module>dabaicai-netty-rpc-server</module>
         <module>dabaicai-netty-rpc-login</module>
         <module>dabaicai-netty-server-demo</module>
-        <module>dabaicai-netty-rpc-client-damo</module>
+        <module>dabaicai-netty-rpc-client-demo</module>
     </modules>
 
     <properties>
