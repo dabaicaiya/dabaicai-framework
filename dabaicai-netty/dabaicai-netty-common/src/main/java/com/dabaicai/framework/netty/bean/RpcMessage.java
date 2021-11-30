@@ -9,7 +9,7 @@ import lombok.Data;
  * Date: 2021/11/30 9:18
  */
 @Data
-public class RpcMessage<T> {
+public class RpcMessage {
 
     /**
      * 请求url
@@ -24,6 +24,6 @@ public class RpcMessage<T> {
     /**
      * 请求的数据区
      */
-    private T data;
+    private String data;
 
 }

@@ -29,6 +29,7 @@
         <oshi.version>3.5.0</oshi.version>
         <junit.version>4.12</junit.version>
         <lombok.version>1.18.10</lombok.version>
+        <apache.version>3.9</apache.version>
     </properties>
 
 </project>

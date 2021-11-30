@@ -9,7 +9,7 @@ import com.dabaicai.framework.netty.server.ioc.HandlerFactory;
 public class Application {
 
     public static void main(String[] args) {
-        HandlerFactory handlerFactory = new HandlerFactory();
+        HandlerFactory handlerFactory = HandlerFactory.getInst();
 
         handlerFactory.getClass();
     }

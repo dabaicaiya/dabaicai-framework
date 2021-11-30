@@ -13,11 +13,21 @@ import java.util.Map;
 public class HandlerFactory {
 
     /**
+     * 单利模式
+     */
+    private static HandlerFactory handlerFactory = new HandlerFactory();
+
+    public static HandlerFactory getInst() {
+        return handlerFactory;
+    }
+
+
+    /**
      * 方法处理工厂
      */
-    private Map<String, RpcHandlerBean> rpcHandlerFactory = new HashMap<>();
+    private Map<String, RpcHandler> rpcHandlerFactory = new HashMap<>();
 
-    public HandlerFactory() {
+    private HandlerFactory() {
         AppContext appContext = AppContext.getAppContext();
         List<HandlerBean> handlerList = appContext.getHandlerList();
         for (HandlerBean handlerBean : handlerList) {
@@ -33,12 +43,21 @@ public class HandlerFactory {
             Object handler = handlerBean.getHandler();
             Method[] handlerMethods = handler.getClass().getDeclaredMethods();
             for (Method handlerMethod : handlerMethods) {
-                RpcHandlerBean rpcHandlerBean = new RpcHandlerBean();
+                RpcHandler rpcHandlerBean = new RpcHandler();
                 rpcHandlerBean.setHandlerBean(handlerBean);
                 rpcHandlerBean.setUrl(newBaseUrl + "/" + handlerMethod.getName());
                 rpcHandlerBean.setHandlerMethod(handlerMethod);
                 rpcHandlerFactory.put(rpcHandlerBean.getUrl(), rpcHandlerBean);
             }
         }
+    }
+
+    public RpcHandler get(String url) {
+
+        return rpcHandlerFactory.get(url);
+    }
+
+    public boolean containsUrl(String url) {
+        return rpcHandlerFactory.containsKey(url);
     }
 }
