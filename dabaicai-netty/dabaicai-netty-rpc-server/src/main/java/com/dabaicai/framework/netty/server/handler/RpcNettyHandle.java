@@ -47,6 +47,8 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
                 break;
             }
             case BYTE: {
+                // 二进制处理
+                ByteNettyHandler.channelRead(ctx, bytesMessage, 4, bytesMessage.length - 4);
                 return;
             }
             default: return;
