@@ -2,6 +2,8 @@ package com.dabaicai.framework.netty.server.ioc;
 
 import lombok.Data;
 
+import java.lang.reflect.Method;
+
 /**
  * @author zhangyanbing
  * @Description: 处理器类
@@ -15,19 +17,10 @@ public class HandlerBean {
      */
     private String baseUrl;
 
-    /**
-     * 接口名称
-     */
-    private String interfaceName;
 
     /**
      * 处理器执行类
      */
     private Object handler;
-
-    /**
-     * 消息响应发送
-     */
-    private Object response;
 
 }

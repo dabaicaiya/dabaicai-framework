@@ -12,6 +12,9 @@ import java.util.Map;
  */
 public class HandlerFactory {
 
+    /**
+     * 方法处理工厂
+     */
     private Map<String, RpcHandlerBean> rpcHandlerFactory = new HashMap<>();
 
     public HandlerFactory() {
@@ -33,6 +36,8 @@ public class HandlerFactory {
                 RpcHandlerBean rpcHandlerBean = new RpcHandlerBean();
                 rpcHandlerBean.setHandlerBean(handlerBean);
                 rpcHandlerBean.setUrl(newBaseUrl + "/" + handlerMethod.getName());
+                rpcHandlerBean.setHandlerMethod(handlerMethod);
+                rpcHandlerFactory.put(rpcHandlerBean.getUrl(), rpcHandlerBean);
             }
         }
     }

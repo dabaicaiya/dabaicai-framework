@@ -1,7 +1,7 @@
 package com.dabaicai.framework.netty.server.ioc;
 
 import com.dabaicai.framework.netty.annotation.Handler;
-import com.dabaicai.framework.netty.annotation.Response;
+import com.dabaicai.framework.netty.annotation.Request;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Proxy;
@@ -41,14 +41,7 @@ public class AppContext {
      * 初始化
      */
     public void init() {
-        List<HandlerBean> handlerBeans = scanHandler();
-        Map<String, Object> responseMap = scanResponse();
-        for (HandlerBean handlerBean : handlerBeans) {
-            if (handlerBean.getInterfaceName() != null && responseMap.containsKey(handlerBean.getInterfaceName())) {
-                handlerBean.setResponse(responseMap.get(handlerBean.getInterfaceName()));
-            }
-        }
-        this.handlerList = handlerBeans;
+        this.handlerList = scanHandler();
     }
 
     /**
@@ -69,10 +62,6 @@ public class AppContext {
                     e.printStackTrace();
                 }
                 Handler handler = klass.getAnnotation(Handler.class);
-                Class<?>[] interfaces = klass.getInterfaces();
-                if (interfaces.length > 0) {
-                    handlerBean.setInterfaceName(interfaces[0].getName());
-                }
                 String baseUrl = handler.value();
                 handlerBean.setBaseUrl(baseUrl);
                 handlerList.add(handlerBean);
@@ -87,7 +76,7 @@ public class AppContext {
      */
     public Map<String, Object> scanResponse() {
         Map<String, Object> map = new HashMap<>();
-        List<Class<? extends Annotation>> classes = Arrays.asList(Response.class);
+        List<Class<? extends Annotation>> classes = Arrays.asList(Request.class);
         new PackageScanner(basePackage, classes) {
             @Override
             public void dealClass(Class<?> klass) {
