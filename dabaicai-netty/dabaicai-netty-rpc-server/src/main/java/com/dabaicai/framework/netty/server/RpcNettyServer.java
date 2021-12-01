@@ -19,6 +19,7 @@ public class RpcNettyServer implements Runnable{
     public RpcNettyServer(String scanPackage, int port) {
         this.scanPackage = scanPackage;
         this.port = port;
+        System.setProperty("dabaicai.netty.scanPackage", scanPackage);
         nettyServer = new NettyServer(new RpcNettyHandle(), port);
     }
 

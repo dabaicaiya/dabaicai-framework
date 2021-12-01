@@ -2,6 +2,7 @@ package com.dabaicai.framework.netty.server.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dabaicai.framework.common.utils.IntUtils;
+import com.dabaicai.framework.common.utils.ThreadPoolUtils;
 import com.dabaicai.framework.netty.bean.RpcMessage;
 import com.dabaicai.framework.netty.enums.NettyMessageType;
 import com.dabaicai.framework.netty.server.ioc.HandlerFactory;
@@ -24,6 +25,7 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
      */
     private HandlerFactory handler = HandlerFactory.getInst();
 
+
     /**
      * 接收请求后的处理类
      * @param ctx
@@ -31,6 +33,16 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        // 使用线程池执行任务
+        RpcHandleThreadPool.execute(() -> executeRead(ctx, msg));
+    }
+
+    /**
+     * 执行数据读取
+     * @param ctx
+     * @param msg
+     */
+    public void executeRead(ChannelHandlerContext ctx, Object msg) {
         byte[] bytesMessage = (byte[]) msg;
         // 获取请求数据类型
         int messageType = IntUtils.byteArrayToInt(bytesMessage, true);
@@ -55,6 +67,8 @@ public class RpcNettyHandle extends ChannelInboundHandlerAdapter {
             default: return;
         }
     }
+
+
 
     /**
      * rpc 调用处理方法

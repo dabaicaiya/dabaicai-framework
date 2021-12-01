@@ -18,7 +18,14 @@ public class AppContext {
     /**
      * 扫描包路径
      */
-    private String basePackage = "com.dabaicai";
+    private String basePackage;
+    {
+        String basePackage = System.getProperty("dabaicai.netty.scanPackage");
+        if (basePackage == null) {
+            basePackage = "com.dabaicai";
+        }
+        this.basePackage = basePackage;
+    }
 
     private static AppContext appContext = null;
 
