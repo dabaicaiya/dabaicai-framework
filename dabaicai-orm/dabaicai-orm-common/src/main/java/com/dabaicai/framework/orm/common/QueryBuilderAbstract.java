@@ -1,5 +1,6 @@
 package com.dabaicai.framework.orm.common;
 
+import com.dabaicai.framework.common.utils.cache.LruCache;
 import com.dabaicai.framework.orm.common.annotation.*;
 
 import java.lang.annotation.Annotation;
@@ -19,6 +20,18 @@ public abstract class QueryBuilderAbstract<T> {
      */
     private static Map<String, String> annotationList = new HashMap<>();
 
+    /**
+     * 字段详情缓存
+     */
+    private static Map<String, List<FieldDetails>> fieldDetailsCache = new LruCache<>(100);
+
+    /**
+     * 往t里面设置查询条件
+     * @param queryParams
+     * @param t
+     * @param doClass
+     * @return
+     */
     public T build(Object queryParams, T t, Class<?> doClass) {
         List<FieldDetails> classFieldDetails = getClassFieldDetails(queryParams.getClass());
         // 获取do的所有属性
@@ -67,6 +80,7 @@ public abstract class QueryBuilderAbstract<T> {
     /**
      * 不等于
      *
+     * @param t
      * @param fieldName
      * @param value
      */
@@ -74,7 +88,7 @@ public abstract class QueryBuilderAbstract<T> {
 
     /**
      * 小于
-     *
+     * @param t
      * @param fieldName
      * @param value
      */
@@ -82,7 +96,7 @@ public abstract class QueryBuilderAbstract<T> {
 
     /**
      * 模糊查询
-     *
+     * @param t
      * @param fieldName
      * @param value
      */
@@ -90,7 +104,7 @@ public abstract class QueryBuilderAbstract<T> {
 
     /**
      * 小于等于
-     *
+     * @param t
      * @param fieldName
      * @param value
      */
@@ -98,7 +112,7 @@ public abstract class QueryBuilderAbstract<T> {
 
     /**
      * 大于
-     *
+     * @param t
      * @param fieldName
      * @param value
      */
@@ -106,7 +120,7 @@ public abstract class QueryBuilderAbstract<T> {
 
     /**
      * 大于等于
-     *
+     * @param t
      * @param fieldName
      * @param value
      */
@@ -114,7 +128,7 @@ public abstract class QueryBuilderAbstract<T> {
 
     /**
      * 相等比较
-     *
+     * @param t
      * @param fieldName
      * @param value
      */
@@ -152,11 +166,6 @@ public abstract class QueryBuilderAbstract<T> {
         }
         return resList;
     }
-
-    /**
-     * 字段详情缓存
-     */
-    private static Map<String, List<FieldDetails>> fieldDetailsCache = new HashMap<>();
 
     /**
      * 获取类相关属性
