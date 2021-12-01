@@ -2,10 +2,8 @@ package com.dabaicai.framework.netty.server.ioc;
 
 import com.dabaicai.framework.common.beans.PackageScanner;
 import com.dabaicai.framework.netty.annotation.Handler;
-import com.dabaicai.framework.netty.annotation.Request;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Proxy;
 import java.util.*;
 
 /**
@@ -13,7 +11,7 @@ import java.util.*;
  * @Description: 上下文
  * @date 2021/11/29 20:17
  */
-public class AppContext {
+public class ServerAppContext {
 
     /**
      * 扫描包路径
@@ -27,21 +25,21 @@ public class AppContext {
         this.basePackage = basePackage;
     }
 
-    private static AppContext appContext = null;
+    private static ServerAppContext appContext = null;
 
     /**
      * 处理器扫描类
      */
     private List<HandlerBean> handlerList = null;
 
-    public static AppContext getAppContext() {
+    public static ServerAppContext getAppContext() {
         if (appContext == null) {
-            appContext = new AppContext();
+            appContext = new ServerAppContext();
         }
         return appContext;
     }
 
-    public AppContext() {
+    public ServerAppContext() {
         init();
     }
 

@@ -17,11 +17,8 @@ import java.nio.ByteOrder;
 
 
 /**
- * @author Administrator
- * @Title:
- * @Package
- * @Description: 转发服务器
- * @编写人： 张艳兵
+ * @author zhangyanbing
+ * @Description: 服务器
  * @时间： 2020年8月7日08:31:16
  */
 public class NettyServer implements Runnable {

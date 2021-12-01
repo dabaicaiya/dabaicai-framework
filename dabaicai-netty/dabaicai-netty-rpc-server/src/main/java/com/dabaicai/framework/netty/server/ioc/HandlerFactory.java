@@ -5,7 +5,6 @@ import com.dabaicai.framework.netty.utils.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,7 @@ public class HandlerFactory {
     private Map<String, RpcHandler> rpcHandlerFactory = new HashMap<>();
 
     private HandlerFactory() {
-        AppContext appContext = AppContext.getAppContext();
+        ServerAppContext appContext = ServerAppContext.getAppContext();
         List<HandlerBean> handlerList = appContext.getHandlerList();
         for (HandlerBean handlerBean : handlerList) {
             // 处理器

@@ -1,12 +1,10 @@
 package com.dabaicai.framework.netty.client.request;
 
 import com.dabaicai.framework.common.beans.PackageScanner;
-import com.dabaicai.framework.netty.annotation.Handler;
 import com.dabaicai.framework.netty.annotation.Request;
 import com.dabaicai.framework.netty.client.proxy.RequestProxy;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Proxy;
 import java.util.*;
 
 /**
@@ -14,18 +12,18 @@ import java.util.*;
  * @Description: 上下文
  * @date 2021/11/29 20:17
  */
-public class AppContext {
+public class ClientAppContext {
 
 
-    private static AppContext appContext = new AppContext();
+    private static ClientAppContext appContext = new ClientAppContext();
 
     private static Map<String, Object> requestMap;
 
-    public static AppContext getAppContext() {
+    public static ClientAppContext getAppContext() {
         return appContext;
     }
 
-    private AppContext() {
+    private ClientAppContext() {
         requestMap = scanRequest("com.dabaicai");
     }
 

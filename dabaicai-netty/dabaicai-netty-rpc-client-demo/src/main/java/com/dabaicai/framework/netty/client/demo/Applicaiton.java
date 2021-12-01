@@ -2,7 +2,7 @@ package com.dabaicai.framework.netty.client.demo;
 
 import com.dabaicai.framework.netty.client.demo.req.LoginReq;
 import com.dabaicai.framework.netty.client.demo.request.LoginApi;
-import com.dabaicai.framework.netty.client.request.AppContext;
+import com.dabaicai.framework.netty.client.request.ClientAppContext;
 
 /**
  * @author zhangyanbing
@@ -11,7 +11,7 @@ import com.dabaicai.framework.netty.client.request.AppContext;
 public class Applicaiton {
 
     public static void main(String[] args) {
-        AppContext appContext = AppContext.getAppContext();
+        ClientAppContext appContext = ClientAppContext.getAppContext();
         LoginApi loginApi = appContext.getBean(LoginApi.class);
         System.out.println(loginApi);
         loginApi.login(new LoginReq());
