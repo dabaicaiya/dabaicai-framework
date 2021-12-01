@@ -14,6 +14,17 @@ import java.util.*;
  */
 public class ClientAppContext {
 
+    /**
+     * 扫描包路径
+     */
+    private String basePackage;
+    {
+        String basePackage = System.getProperty("dabaicai.netty.scanPackage");
+        if (basePackage == null) {
+            basePackage = "com.dabaicai";
+        }
+        this.basePackage = basePackage;
+    }
 
     private static ClientAppContext appContext = new ClientAppContext();
 
@@ -24,7 +35,7 @@ public class ClientAppContext {
     }
 
     private ClientAppContext() {
-        requestMap = scanRequest("com.dabaicai");
+        requestMap = scanRequest(basePackage);
     }
 
     /**

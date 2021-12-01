@@ -11,17 +11,20 @@ import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import lombok.Data;
 import lombok.SneakyThrows;
 
 import javax.net.ssl.SSLException;
 import java.nio.ByteOrder;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author zhangyanbing
  * @Description 客户端
  * @date 2020/7/11 16:55
  */
+@Data
 public class NettyClient implements Runnable {
 
     private static final boolean SSL = System.getProperty("ssl") != null;
@@ -41,6 +44,17 @@ public class NettyClient implements Runnable {
      */
     private ChannelInboundHandlerAdapter channelInboundHandlerAdapter;
 
+    /**
+     * 连接的通道
+     */
+    private Channel channel;
+
+
+    public NettyClient(String host, Integer port, ChannelInboundHandlerAdapter channelInboundHandlerAdapter) {
+        this.host = host;
+        this.port = port;
+        this.channelInboundHandlerAdapter = channelInboundHandlerAdapter;
+    }
 
     /**
      * 用于线程同步， netty启动结束后会进入阻塞状态  所以在子线程中创建，然后在主线程进行等待连接成功
@@ -48,16 +62,18 @@ public class NettyClient implements Runnable {
     private CountDownLatch countDownLatch = new CountDownLatch(2);
 
 
-    public void start() {
+    public boolean start() {
         //设置处理器
         new Thread(this).start();
         countDownLatch.countDown();
         //等待连接成功
         try {
-            countDownLatch.await();
+            countDownLatch.await(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     public void startClient() throws InterruptedException, SSLException {
@@ -69,28 +85,29 @@ public class NettyClient implements Runnable {
             sslCtx = null;
         }
         EventLoopGroup group = new NioEventLoopGroup();
-        Bootstrap b = new Bootstrap();
-        b.group(group)
-                .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline p = ch.pipeline();
-                        if (sslCtx != null) {
-                            p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
-                        }
-                        p.addFirst(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 100000000, 0, 4, 0, 4, true));
-                        p.addLast(new ByteArrayDecoder());
-                        p.addLast(new ByteArrayEncoder());
-                        p.addLast(channelInboundHandlerAdapter);
-                    }
-                });
-
-        // Start the client.
-        ChannelFuture f = b.connect(host, port).sync();
-        System.out.println("Client  ServerBootstrap配置启动完成");
-        countDownLatch.countDown();
         try {
+            Bootstrap b = new Bootstrap();
+            b.group(group)
+                    .channel(NioSocketChannel.class)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline p = ch.pipeline();
+                            if (sslCtx != null) {
+                                p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
+                            }
+                            p.addFirst(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 100000000, 0, 4, 0, 4, true));
+                            p.addLast(new ByteArrayDecoder());
+                            p.addLast(new ByteArrayEncoder());
+                            p.addLast(channelInboundHandlerAdapter);
+                        }
+                    });
+
+            // Start the client.
+            ChannelFuture f = b.connect(host, port).sync();
+            channel = f.channel();
+            System.out.println("Client  ServerBootstrap配置启动完成");
+            countDownLatch.countDown();
             f.channel().closeFuture().sync();
         } finally {
             // Shut down the event loop to terminate all threads.
@@ -104,4 +121,6 @@ public class NettyClient implements Runnable {
     public void run() {
         startClient();
     }
+
+
 }
