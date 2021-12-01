@@ -9,17 +9,18 @@ import com.dabaicai.framework.netty.enums.NettyMessageType;
 import io.netty.channel.Channel;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author zhangyanbing
- * @Description: 远程调用服务器
+ * @Description: 远程调用客户端
  * @date 2021/11/29 20:14
  */
 public class RpcNettyClient implements Runnable{
 
-    private int port;
+    private final int port;
 
-    private String serverIp;
+    private final String serverIp;
 
     private NettyClient nettyClient;
 
@@ -40,20 +41,17 @@ public class RpcNettyClient implements Runnable{
     }
 
     /**
+     * 写锁
+     */
+    private final ReentrantLock writeLock = new ReentrantLock();
+
+    /**
      * 发送一个rpc Message
      * @param message
      */
     public void writeMessage(RpcMessage message) {
-        Channel channel = nettyClient.getChannel();
-        if (channel == null) {
-            return;
-        }
-        byte[] messageType = IntUtils.intToByteLittle(NettyMessageType.RPC.getKey());
         byte[] bytes = JSONObject.toJSONString(message).getBytes(StandardCharsets.UTF_8);
-        byte[] messageLen = IntUtils.intToByteLittle(bytes.length + 4);
-        channel.write(messageLen);
-        channel.write(messageType);
-        channel.writeAndFlush(bytes);
+        writeAndFlush(NettyMessageType.RPC.getKey(), bytes);
     }
 
     /**
@@ -61,14 +59,29 @@ public class RpcNettyClient implements Runnable{
      * @param bytes
      */
     public void writeBytes(byte[] bytes) {
+        writeAndFlush(NettyMessageType.BYTE.getKey(), bytes);
+    }
+
+    /**
+     * 发送数据
+     * @param type 类型
+     * @param bytes 具体数据
+     */
+    private void writeAndFlush(int type, byte[] bytes) {
         Channel channel = nettyClient.getChannel();
         if (channel == null) {
             return;
         }
-        byte[] messageType = IntUtils.intToByteLittle(NettyMessageType.RPC.getKey());
-        channel.write(bytes.length + 4);
-        channel.write(messageType);
-        channel.writeAndFlush(bytes);
+        byte[] messageLen = IntUtils.intToByteLittle(bytes.length + 4);
+        byte[] messageType = IntUtils.intToByteLittle(type);
+        writeLock.lock();
+        try {
+            channel.write(messageLen);
+            channel.write(messageType);
+            channel.writeAndFlush(bytes);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
