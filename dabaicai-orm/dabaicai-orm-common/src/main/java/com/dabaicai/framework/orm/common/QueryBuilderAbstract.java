@@ -18,12 +18,12 @@ public abstract class QueryBuilderAbstract<T> {
     /**
      * 与查询相关的注解
      */
-    private static Map<String, String> annotationList = new HashMap<>();
+    private static final Map<String, String> annotationList = new HashMap<>();
 
     /**
      * 字段详情缓存
      */
-    private static Map<String, List<FieldDetails>> fieldDetailsCache = new LruCache<>(100);
+    private static final Map<String, List<FieldDetails>> fieldDetailsCache = new LruCache<>(100);
 
     /**
      * 往t里面设置查询条件
