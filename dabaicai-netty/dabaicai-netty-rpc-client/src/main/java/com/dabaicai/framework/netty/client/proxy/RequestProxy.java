@@ -4,6 +4,7 @@ package com.dabaicai.framework.netty.client.proxy;
 import com.alibaba.fastjson.JSONObject;
 import com.dabaicai.framework.netty.annotation.Request;
 import com.dabaicai.framework.netty.bean.RpcMessage;
+import com.dabaicai.framework.netty.client.request.ClientAppContext;
 import com.dabaicai.framework.netty.utils.UrlUtils;
 
 import java.lang.reflect.InvocationHandler;
@@ -34,6 +35,7 @@ public class RequestProxy implements InvocationHandler {
         if (args.length > 0) {
             rpcMes.setData(JSONObject.toJSONString(args[0]));
         }
+        ClientAppContext.writeMessage(rpcMes);
         return null;
     }
 

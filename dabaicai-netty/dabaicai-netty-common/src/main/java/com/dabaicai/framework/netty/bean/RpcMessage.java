@@ -12,7 +12,7 @@ import lombok.Data;
 public class RpcMessage {
 
     /**
-     * 请求url
+     * 请求id
      */
     private String messageId;
 
@@ -26,4 +26,8 @@ public class RpcMessage {
      */
     private String data;
 
+    public RpcMessage() {
+        // todo: 生成一个 messageId
+
+    }
 }

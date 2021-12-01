@@ -5,8 +5,10 @@ import com.dabaicai.framework.common.utils.IntUtils;
 import com.dabaicai.framework.netty.NettyClient;
 import com.dabaicai.framework.netty.bean.RpcMessage;
 import com.dabaicai.framework.netty.client.handler.RpcClientHandler;
+import com.dabaicai.framework.netty.client.request.ClientAppContext;
 import com.dabaicai.framework.netty.enums.NettyMessageType;
 import io.netty.channel.Channel;
+import javafx.application.Application;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,16 +20,11 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class RpcNettyClient implements Runnable{
 
-    private final int port;
-
-    private final String serverIp;
-
     private NettyClient nettyClient;
 
-    public RpcNettyClient(String scanPackage, String serverIp, int port) {
-        System.setProperty("dabaicai.netty.scanPackage", scanPackage);
-        this.port = port;
-        this.serverIp = serverIp;
+    public RpcNettyClient(String serverIp, int port) {
+        ClientAppContext.setServerIp(serverIp);
+        ClientAppContext.setPort(port);
         init();
     }
 
@@ -37,7 +34,7 @@ public class RpcNettyClient implements Runnable{
     public void init() {
         // 事件处理器
         RpcClientHandler rpcClientHandler = new RpcClientHandler();
-        nettyClient = new NettyClient(serverIp, port, rpcClientHandler);
+        nettyClient = new NettyClient(ClientAppContext.getServerIp(), ClientAppContext.getPort(), rpcClientHandler);
     }
 
     /**
