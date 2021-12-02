@@ -1,8 +1,11 @@
 package com.dabaicai.framework.common.utils.index;
 
+
+import com.dabaicai.framework.common.lambda.SFunction;
+import lombok.Data;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * 抽象索引
@@ -21,29 +24,27 @@ public  abstract class IndexAbstract<V extends IndexEntry> implements Index<V> {
     /**
      * 非聚簇索引 每一项都是索引 索引位 v里面的属性到k的映射
      */
-    private Map<Function<V, Object>, Map<Object, Object>> indexFiledMap = new HashMap();
-
+    private Map<String, PropertyIndex<V>> indexFiledMap = new HashMap();
 
 
     @Override
-    public void createIndex(Function<V, Object> function) {
-        System.out.println(function);
-        indexFiledMap.put(function, getMap());
+    public void createIndex(SFunction<V, Object> function) {
+        PropertyIndex<V> newIndex = new PropertyIndex<>();
+        newIndex.setFunction(function);
+        newIndex.setIndexMap(getMap());
+        newIndex.setIndexName(function.getImplMethodName());
+        indexFiledMap.put(newIndex.getIndexName(), newIndex);
     }
 
 
     @Override
     public boolean put(V v) {
-        if (rootMap.containsKey(v.getId())) {
-            return false;
-        }
         rootMap.put(v.getId(), v);
         // 添加每一个 非聚簇索引的新索引
-        for (Map.Entry<Function<V, Object>, Map<Object, Object>> functionMapEntry : indexFiledMap.entrySet()) {
-            Function<V, Object> function = functionMapEntry.getKey();
+        for (PropertyIndex<V> propertyIndex : indexFiledMap.values()) {
             // 获取属性
-            Object propertyValue = function.apply(v);
-            functionMapEntry.getValue().put(propertyValue, v.getId());
+            Object propertyValue = propertyIndex.getFunction().apply(v);
+            propertyIndex.getIndexMap().put(propertyValue, v.getId());
         }
         return true;
     }
@@ -57,30 +58,30 @@ public  abstract class IndexAbstract<V extends IndexEntry> implements Index<V> {
 
 
     @Override
-    public V get(Function<V, Object> propertyFunction, Object value) {
-        Map<Object, Object> keyMap = indexFiledMap.get(propertyFunction);
-        if (keyMap == null) return null;
+    public V get(SFunction<V, Object> propertyFunction, Object value) {
+        PropertyIndex<V> propertyIndex = indexFiledMap.get(propertyFunction.getImplMethodName());
+        if (propertyIndex == null) return null;
         // 获取属性对应的key
-        Object key = keyMap.get(value);
+        Object key = propertyIndex.getIndexMap().get(value);
         return get(key);
     }
 
 
     @Override
-    public boolean removeByProperty(Function<V, Object> propertyFunction, Object property) {
-        Map<Object, Object> keyMap = indexFiledMap.get(propertyFunction);
-        if (keyMap == null) return false;
-        Object key = keyMap.get(property);
+    public <T> boolean removeByProperty(SFunction<V, T> propertyFunction, T property) {
+        PropertyIndex<V> propertyIndex = indexFiledMap.get(propertyFunction.getImplMethodName());
+        if (propertyIndex == null) return false;
+        Object key = propertyIndex.getIndexMap().get(property);
         // 获取全部数据
         V v = rootMap.get(key);
+        if (v == null) return false;
         // 删除主数据
         rootMap.remove(key);
         // 删除索引树
-        for (Map.Entry<Function<V, Object>, Map<Object, Object>> functionMapEntry : indexFiledMap.entrySet()) {
-            Function<V, Object> function = functionMapEntry.getKey();
+        for (PropertyIndex<V> vPropertyIndex : indexFiledMap.values()) {
             // 获取属性
-            Object propertyValue = function.apply(v);
-            functionMapEntry.getValue().remove(propertyValue);
+            Object propertyValue = vPropertyIndex.getFunction().apply(v);
+            vPropertyIndex.getIndexMap().remove(propertyValue);
         }
         return true;
     }
@@ -91,6 +92,29 @@ public  abstract class IndexAbstract<V extends IndexEntry> implements Index<V> {
      * @return
      */
     public abstract Map getMap();
+
+
+    /**
+     * 不同的索引区分key
+     */
+    @Data
+    public static class PropertyIndex<VV> {
+
+        /**
+         * 索引名称
+         */
+        private String indexName;
+
+        /**
+         * 获取属性值的方法
+         */
+        private SFunction<VV, Object> function;
+
+        /**
+         * 索引
+         */
+        private Map<Object, Object> indexMap;
+    }
 
 
 }

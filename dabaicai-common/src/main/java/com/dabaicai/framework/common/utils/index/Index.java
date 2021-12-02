@@ -1,6 +1,7 @@
 package com.dabaicai.framework.common.utils.index;
 
-import java.util.function.Function;
+
+import com.dabaicai.framework.common.lambda.SFunction;
 
 /**
  * 索引顶层接口
@@ -14,7 +15,7 @@ public interface Index<V extends IndexEntry> {
      * 添加属性索引，不要添加主键索引，默认已经创建
      * @param function
      */
-    void createIndex(Function<V, Object> function);
+    void createIndex(SFunction<V, Object> function);
 
     /**
      * 添加一个元素
@@ -36,7 +37,7 @@ public interface Index<V extends IndexEntry> {
      * @param value 属性值
      * @return
      */
-     V get(Function<V, Object> propertyFunction, Object value);
+     V get(SFunction<V, Object> propertyFunction, Object value);
 
     /**
      * 根据 属性 删除元素
@@ -44,5 +45,5 @@ public interface Index<V extends IndexEntry> {
      * @param property 属性值
      * @return
      */
-    boolean removeByProperty(Function<V, Object> propertyFunction, Object property);
+    <T> boolean  removeByProperty(SFunction<V, T> propertyFunction, T property);
 }

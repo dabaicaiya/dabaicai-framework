@@ -1,6 +1,5 @@
 package com.dabaicai.framework.common.utils.index;
 
-import lombok.Data;
 
 import java.util.HashMap;
 import java.util.Map;

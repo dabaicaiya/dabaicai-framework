@@ -1,6 +1,5 @@
 package com.dabaicai.framework.orm.mybatis;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dabaicai.framework.orm.common.QueryBuilderAbstract;
 
