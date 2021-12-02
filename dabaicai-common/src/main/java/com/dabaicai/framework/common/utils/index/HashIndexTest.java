@@ -27,6 +27,7 @@ public class HashIndexTest {
         index.put(user2);
         index.put(user3);
         index.put(user4);
+        boolean b = index.removeByProperty(TestBean::getCard, 444L);
         System.out.println(index);
     }
 

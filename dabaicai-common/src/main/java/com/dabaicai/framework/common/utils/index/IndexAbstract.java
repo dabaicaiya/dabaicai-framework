@@ -27,6 +27,7 @@ public  abstract class IndexAbstract<V extends IndexEntry> implements Index<V> {
 
     @Override
     public void createIndex(Function<V, Object> function) {
+        System.out.println(function);
         indexFiledMap.put(function, getMap());
     }
 
