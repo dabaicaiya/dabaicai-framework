@@ -7,17 +7,17 @@ import java.lang.annotation.Target;
 
 /**
  * @author zhangyanbing
- * @Description:
- * @date 2021/11/29 20:09
+ * Date: 2021/12/6 10:17
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Indexed
-public @interface Handler {
+public @interface Indexed {
 
     /**
-     * baseUrl
-     * @return
+     * The value may indicate a suggestion for a logical component name,
+     * to be turned into a Spring bean in case of an autodetected component.
+     * @return the suggested component name, if any (or empty String otherwise)
      */
-    String value();
+    String value() default "";
+
 }

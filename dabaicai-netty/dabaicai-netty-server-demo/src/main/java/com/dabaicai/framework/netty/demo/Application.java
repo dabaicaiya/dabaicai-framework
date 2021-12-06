@@ -26,8 +26,6 @@ public class Application {
         rpcMes.setData(JSONObject.toJSONString(login));
         Object o = handlerFactory.invokeHandler(rpcMes);
         System.out.println(o);
-        JFrame jFrame = new JFrame();
-        jFrame.show();
     }
 
 
