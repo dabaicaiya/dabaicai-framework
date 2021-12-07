@@ -30,6 +30,7 @@
         <junit.version>4.12</junit.version>
         <lombok.version>1.18.10</lombok.version>
         <apache.version>3.9</apache.version>
+        <hutool.version>5.7.12</hutool.version>
     </properties>
     <build>
         <plugins>

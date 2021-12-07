@@ -1,9 +1,9 @@
 package com.dabaicai.framework.netty.server.config;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 全局异常配置
@@ -15,15 +15,14 @@ public class GlobalExceptionConfig {
     /**
      * 全局异常处理
      */
-    private static Map<Class<? extends Throwable>, GlobalExceptionHandler<? extends Throwable>> exceptionMap = new LinkedHashMap<>();
+    private static Map<Class<? extends Throwable>, GlobalExceptionHandler> exceptionMap = new LinkedHashMap<>();
 
     /**
      * 添加一个异常捕获
      * @param globalException
      */
-    public static void addGlobalException(GlobalExceptionHandler<? extends Throwable> globalException) {
-        Class<? extends Throwable> exceptionClass = globalException.getExceptionClass();
-        exceptionMap.put(exceptionClass, globalException);
+    public static void addGlobalException(Class<? extends Throwable> e, GlobalExceptionHandler globalException) {
+        exceptionMap.put(e, globalException);
     }
 
     /**
@@ -31,14 +30,18 @@ public class GlobalExceptionConfig {
      * @param dstException
      * @return
      */
-    public static GlobalExceptionHandler getTryException(Throwable dstException) {
-        GlobalExceptionHandler<? extends Throwable> globalExceptionHandler = exceptionMap.get(dstException.getClass());
+    public static GlobalExceptionHandler getTryException(Class<? extends Throwable> dstException) {
+        GlobalExceptionHandler globalExceptionHandler = exceptionMap.get(dstException);
         if (globalExceptionHandler != null) {
             return globalExceptionHandler;
         }
-        List<GlobalExceptionHandler> list = new ArrayList<>();
-        for (GlobalExceptionHandler<? extends Throwable> exceptionHandler : exceptionMap.values()) {
 
+        List<Class<? extends Throwable>> filterList = exceptionMap.keySet()
+                .stream().filter(e -> e.isAssignableFrom(dstException))
+                .sorted(new ExceptionDepthComparator(dstException)).
+                collect(Collectors.toList());
+        if (!filterList.isEmpty()) {
+            return exceptionMap.get(filterList.get(0));
         }
         return null;
     }

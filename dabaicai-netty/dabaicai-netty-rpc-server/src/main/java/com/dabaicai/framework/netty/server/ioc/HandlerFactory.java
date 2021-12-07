@@ -1,6 +1,8 @@
 package com.dabaicai.framework.netty.server.ioc;
 
 import com.dabaicai.framework.netty.bean.RpcMessage;
+import com.dabaicai.framework.netty.server.config.GlobalExceptionConfig;
+import com.dabaicai.framework.netty.server.config.GlobalExceptionHandler;
 import com.dabaicai.framework.netty.utils.UrlUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -65,7 +67,16 @@ public class HandlerFactory {
         }
         // 处理器
         RpcHandler rpcHandlerBean = this.get(url);
-        return rpcHandlerBean.invokeMethod(reqMessage.getData());
+        try {
+            return rpcHandlerBean.invokeMethod(reqMessage.getData());
+        } catch (Exception e) {
+            // 全局异常捕获
+            GlobalExceptionHandler tryException = GlobalExceptionConfig.getTryException(e.getClass());
+            if (tryException == null) {
+                throw e;
+            }
+            return tryException.handler(e);
+        }
     }
 
     public RpcHandler get(String url) {

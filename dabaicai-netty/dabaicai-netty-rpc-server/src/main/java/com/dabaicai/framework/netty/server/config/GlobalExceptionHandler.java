@@ -6,19 +6,13 @@ package com.dabaicai.framework.netty.server.config;
  * @author zhangyanbing
  * Date: 2021/12/6 10:40
  */
-public interface GlobalExceptionHandler <T extends Throwable> {
+public interface GlobalExceptionHandler {
 
     /**
      * 收到异常后的处理
-     * @param t
+     * @param throwable
      * @return
      */
-    Object handler(T t);
-
-    /**
-     * 获取异常类型
-     * @return
-     */
-    Class<T> getExceptionClass();
+    Object handler(Throwable throwable);
 
 }
