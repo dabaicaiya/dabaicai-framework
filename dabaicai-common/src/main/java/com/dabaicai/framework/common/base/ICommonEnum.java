@@ -7,6 +7,8 @@ package com.dabaicai.framework.common.base;
  */
 
 import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public interface ICommonEnum<E extends Enum<E> & ICommonEnum> {
 
@@ -22,31 +24,35 @@ public interface ICommonEnum<E extends Enum<E> & ICommonEnum> {
      */
     Integer getKey();
 
-    /**
-     * 获取枚举的类型
-     * @return
-     */
-    default Class<E> getEnumClass() {
-        return null;
-    }
 
     /**
      * 根据value获取enum
-     * @param value
-     * @return
-     */
-    default  E getEnumByValue(String value) {
-        EnumSet<E> all = EnumSet.allOf(getEnumClass());
-        return all.stream().filter(e -> e.getValue().equals(value)).findFirst().orElse(null);
-    }
-
-    /**
-     * 根据key获取Enum
      * @param key
      * @return
      */
-    default  E getEnumByKey(Integer key) {
-        EnumSet<E> all = EnumSet.allOf(getEnumClass());
-        return all.stream().filter(e -> e.getKey().equals(key)).findFirst().orElse(null);
+    static <E extends Enum<E> & ICommonEnum> E getEnumByKey(Integer key, Class<E> clazz) {
+        if (key == null) {
+            return null;
+        }
+        EnumSet<E> all = EnumSet.allOf(clazz);
+        return all.stream().filter(e -> e.getKey().equals(key) ).findFirst().orElse(null);
+    }
+
+    /**
+     * 根据key获取value
+     * @param key
+     * @return
+     */
+    static <E extends Enum<E> & ICommonEnum>  String getValueByKey(Integer key, Class<E> clazz) {
+        E enumByKey = getEnumByKey(key, clazz);
+        if (enumByKey == null) {
+            return null;
+        }
+        return enumByKey.getValue();
+    }
+
+    static <E extends Enum<E> & ICommonEnum> List<EnumVO> getEnumVOList(Class<E> clazz) {
+        EnumSet<E> all = EnumSet.allOf(clazz);
+        return all.stream().map(e->new EnumVO(e.getKey(), e.getValue())).collect(Collectors.toList());
     }
 }
