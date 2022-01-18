@@ -31,6 +31,7 @@
         <lombok.version>1.18.10</lombok.version>
         <apache.version>3.9</apache.version>
         <hutool.version>5.7.12</hutool.version>
+        <concurrentlinkedhashmap-lru.version>1.4.2</concurrentlinkedhashmap-lru.version>
     </properties>
     <build>
         <plugins>
