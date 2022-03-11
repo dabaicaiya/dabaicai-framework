@@ -1,29 +1,31 @@
 package com.dabaicai.framework.orm.common;
 
-import com.dabaicai.framework.common.utils.cache.LruCache;
-import com.dabaicai.framework.orm.common.annotation.*;
+import com.dabaicai.framework.common.beans.BeanUtils;
+import com.dabaicai.framework.orm.common.handler.QueryHandler;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
+import sun.reflect.annotation.AnnotationType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * @author zhangyanbing
- * @Description: 查询构造器的抽象类
+ * @Description: 查询构造器的抽象类 可用于mybatis es等查询构造 具体查询什么子类实现对应的处理器
  * @date 2021/11/28 21:38
  */
 public abstract class QueryBuilderAbstract<T> {
 
     /**
-     * 与查询相关的注解
-     */
-    private static final Map<String, String> annotationList = new HashMap<>();
-
-    /**
      * 字段详情缓存
      */
-    private static final Map<String, List<FieldDetails>> fieldDetailsCache = new LruCache<>(100);
+    private static final Map<String, List<FieldDetails>> FIELD_DETAILS_CACHE = new ConcurrentLinkedHashMap.Builder<String, List<FieldDetails>>()
+            .maximumWeightedCapacity(500).weigher(Weighers.singleton()).build();
 
     /**
      * 往t里面设置查询条件
@@ -34,6 +36,7 @@ public abstract class QueryBuilderAbstract<T> {
      */
     public T build(Object queryParams, T t, Class<?> doClass) {
         List<FieldDetails> classFieldDetails = getClassFieldDetails(queryParams.getClass());
+        Map<Class<? extends Annotation>, QueryHandler<Object, T>> queryHandler = getQueryHandler();
         // 获取do的所有属性
         Map<String, List<Field>> doFieldMap = FieldUtils.scanFields(doClass).stream().collect(Collectors.groupingBy(Field::getName));
         // 循环设置属性
@@ -53,24 +56,14 @@ public abstract class QueryBuilderAbstract<T> {
                     continue;
                 }
                 if (annotation == null) {
-                    queryEquals(t, classFieldDetail.getFieldName(), value);
-                } else {
-                    String annotationName = annotation.getClass().getName();
-                    if (annotationName.equals(Equals.class.getName())) {
-                        queryEquals(t, classFieldDetail.getFieldName(), value);
-                    } else if (annotationName.equals(Ge.class.getName())) {
-                        queryGe(t, classFieldDetail.getFieldName(), value);
-                    } else if (annotationName.equals(Gt.class.getName())) {
-                        queryGt(t, classFieldDetail.getFieldName(), value);
-                    } else if (annotationName.equals(Le.class.getName())) {
-                        queryLe(t, classFieldDetail.getFieldName(), value);
-                    } else if (annotationName.equals(Like.class.getName())) {
-                        queryLike(t, classFieldDetail.getFieldName(), value);
-                    } else if (annotationName.equals(Lt.class.getName())) {
-                        queryLt(t, classFieldDetail.getFieldName(), value);
-                    } else if (annotationName.equals(Ne.class.getName())) {
-                        queryNe(t, classFieldDetail.getFieldName(), value);
-                    }
+                    continue;
+                }
+                AnnotationType instance = AnnotationType.getInstance(annotation.getClass());
+                Class<?> target = BeanUtils.getTarget(annotation);
+                Class<? extends Annotation> aClass = annotation.getClass();
+                Boolean bool = annotation.getClass().isAssignableFrom(queryHandler.getClass());
+                if (queryHandler.containsKey(target)) {
+                    queryHandler.get(annotation.getClass()).handler(annotation, t, classFieldDetail.getField(), Collections.emptyMap());
                 }
             }
         }
@@ -78,71 +71,15 @@ public abstract class QueryBuilderAbstract<T> {
     }
 
     /**
-     * 不等于
-     *
-     * @param t
-     * @param fieldName
-     * @param value
-     */
-    protected abstract void queryNe(T t, String fieldName, Object value);
-
-    /**
-     * 小于
-     * @param t
-     * @param fieldName
-     * @param value
-     */
-    protected abstract void queryLt(T t, String fieldName, Object value);
-
-    /**
-     * 模糊查询
-     * @param t
-     * @param fieldName
-     * @param value
-     */
-    protected abstract void queryLike(T t, String fieldName, Object value);
-
-    /**
-     * 小于等于
-     * @param t
-     * @param fieldName
-     * @param value
-     */
-    protected abstract void queryLe(T t, String fieldName, Object value);
-
-    /**
-     * 大于
-     * @param t
-     * @param fieldName
-     * @param value
-     */
-    protected abstract void queryGt(T t,String fieldName, Object value);
-
-    /**
-     * 大于等于
-     * @param t
-     * @param fieldName
-     * @param value
-     */
-    protected abstract void queryGe(T t, String fieldName, Object value);
-
-    /**
-     * 相等比较
-     * @param t
-     * @param fieldName
-     * @param value
-     */
-    protected abstract void queryEquals(T t, String fieldName, Object value);
-
-    /**
      * 获取类相关属性
      *
      * @return
      */
-    private static List<FieldDetails> getClassFieldDetails(Class aClass) {
-        if (fieldDetailsCache.containsKey(Object.class.getName())) {
-            return fieldDetailsCache.get(Object.class.getName());
+    private List<FieldDetails> getClassFieldDetails(Class aClass) {
+        if (FIELD_DETAILS_CACHE.containsKey(Object.class.getName())) {
+            return FIELD_DETAILS_CACHE.get(Object.class.getName());
         }
+        Map<Class<? extends Annotation>, QueryHandler<Object, T>> queryHandler = getQueryHandler();
         // 获取所有字段
         List<Field> fields = FieldUtils.scanFields(aClass);
         List<FieldDetails> resList = new ArrayList<>();
@@ -153,12 +90,10 @@ public abstract class QueryBuilderAbstract<T> {
             // 扫描类属性及与构造查询条件相关注解信息
             Annotation[] annotations = field.getAnnotations();
             // 注解列表
-            List<Annotation> annotationsList = Arrays.asList(annotations);
-            for (Annotation annotation : annotationsList) {
-                String annotationName = annotation.getClass().getTypeName();
-                if (annotationList.containsKey(annotationName)) {
-                    fieldDetails.setAnnotation(annotation);
-                    break;
+            for (Class<? extends Annotation> queryClass : queryHandler.keySet()) {
+                Annotation[] annotationsByType = field.getAnnotationsByType(queryClass);
+                if (annotationsByType.length > 0) {
+                    fieldDetails.setAnnotation(annotationsByType[0]);
                 }
             }
             fieldDetails.setField(field);
@@ -173,7 +108,14 @@ public abstract class QueryBuilderAbstract<T> {
      * @param queryParams
      * @return
      */
-    private static List<FieldDetails> getClassFieldDetails(Object queryParams) {
+    private List<FieldDetails> getClassFieldDetails(Object queryParams) {
         return getClassFieldDetails(queryParams.getClass());
     }
+
+
+    /**
+     * 获取查询注解相关的处理器
+     * @return
+     */
+    public  abstract <G> Map<Class<? extends Annotation>, QueryHandler<G, T>> getQueryHandler();
 }
