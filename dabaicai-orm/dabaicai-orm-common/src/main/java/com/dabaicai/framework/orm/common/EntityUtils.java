@@ -1,9 +1,9 @@
 package com.dabaicai.framework.orm.common;
 
+import com.dabaicai.framework.common.utils.StringUtils;
 import com.dabaicai.framework.orm.common.base.TableDetail;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Table;
 import java.lang.reflect.Field;
@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
  */
 public class EntityUtils {
 
-    public static final char UNDERLINE = '_';
     /**
      * 数据库实体类缓存
      */
@@ -74,32 +73,10 @@ public class EntityUtils {
         tableDetail.setTableName(table.name());
         tableDetail.setEntityClass(entityClass);
         Field[] fields = entityClass.getDeclaredFields();
-        Map<String, String> columnMap = Arrays.stream(fields).collect(Collectors.toMap(e -> e.getName(), e -> camelToUnderline(e.getName())));
+        Map<String, String> columnMap = Arrays.stream(fields).collect(Collectors.toMap(e -> e.getName(), e -> StringUtils.camelToUnderline(e.getName())));
         tableDetail.setColumnMap(columnMap);
         return tableDetail;
     }
 
-
-    /**
-     * 字符串驼峰转下划线格式
-     *
-     * @param param 需要转换的字符串
-     * @return 转换好的字符串
-     */
-    private static String camelToUnderline(String param) {
-        if (StringUtils.isBlank(param)) {
-            return "";
-        }
-        int len = param.length();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            char c = param.charAt(i);
-            if (Character.isUpperCase(c) && i > 0) {
-                sb.append(UNDERLINE);
-            }
-            sb.append(Character.toLowerCase(c));
-        }
-        return sb.toString();
-    }
 
 }

@@ -1,5 +1,7 @@
 package com.dabaicai.framework.orm.common.handler;
 
+import com.dabaicai.framework.orm.common.QueryFieldDetails;
+
 import java.util.Map;
 
 /**
@@ -15,7 +17,7 @@ public interface QueryHandler <T, G>{
      * @param value 属性值
      * @param params 其他相关参数
      */
-    void handler(T t, G g, Object value, Map<Object, Object> params);
+    void handler(T t, G g, Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params);
 
     /**
      * 获取枚举的class

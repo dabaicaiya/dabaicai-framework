@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
  * @date 2021/3/25 10:16
  */
 @Data
-public class FieldDetails {
+public class QueryFieldDetails {
 
     /**
      * 字段名称
@@ -27,5 +27,17 @@ public class FieldDetails {
      * 对应的字段
      */
     private Field field;
+
+    public Object getFieldValue(Object query) {
+        if (field == null) {
+            return null;
+        }
+        try {
+            return field.get(query);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

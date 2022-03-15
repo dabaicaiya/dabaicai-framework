@@ -4,7 +4,6 @@ import com.dabaicai.framework.common.beans.BeanUtils;
 import com.dabaicai.framework.orm.common.handler.QueryHandler;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
-import sun.reflect.annotation.AnnotationType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -24,7 +23,7 @@ public abstract class QueryBuilderAbstract<T> {
     /**
      * 字段详情缓存
      */
-    private static final Map<String, List<FieldDetails>> FIELD_DETAILS_CACHE = new ConcurrentLinkedHashMap.Builder<String, List<FieldDetails>>()
+    private static final Map<String, List<QueryFieldDetails>> FIELD_DETAILS_CACHE = new ConcurrentLinkedHashMap.Builder<String, List<QueryFieldDetails>>()
             .maximumWeightedCapacity(500).weigher(Weighers.singleton()).build();
 
     /**
@@ -35,12 +34,12 @@ public abstract class QueryBuilderAbstract<T> {
      * @return
      */
     public T build(Object queryParams, T t, Class<?> doClass) {
-        List<FieldDetails> classFieldDetails = getClassFieldDetails(queryParams.getClass());
+        List<QueryFieldDetails> classFieldDetails = getClassFieldDetails(queryParams.getClass());
         Map<Class<? extends Annotation>, QueryHandler<Object, T>> queryHandler = getQueryHandler();
         // 获取do的所有属性
         Map<String, List<Field>> doFieldMap = FieldUtils.scanFields(doClass).stream().collect(Collectors.groupingBy(Field::getName));
         // 循环设置属性
-        for (FieldDetails classFieldDetail : classFieldDetails) {
+        for (QueryFieldDetails classFieldDetail : classFieldDetails) {
             if (doFieldMap.containsKey(classFieldDetail.getFieldName())) {
                 // 查询属性名在  数据库实体类中存在
                 Annotation annotation = classFieldDetail.getAnnotation();
@@ -58,12 +57,13 @@ public abstract class QueryBuilderAbstract<T> {
                 if (annotation == null) {
                     continue;
                 }
-                AnnotationType instance = AnnotationType.getInstance(annotation.getClass());
-                Class<?> target = BeanUtils.getTarget(annotation);
-                Class<? extends Annotation> aClass = annotation.getClass();
-                Boolean bool = annotation.getClass().isAssignableFrom(queryHandler.getClass());
+                // 获取注解的代理接口
+                Class<?> target = BeanUtils.getJdkTarget(annotation);
+                if (target == null) {
+                    continue;
+                }
                 if (queryHandler.containsKey(target)) {
-                    queryHandler.get(annotation.getClass()).handler(annotation, t, classFieldDetail.getField(), Collections.emptyMap());
+                    queryHandler.get(target).handler(annotation, t, queryParams, classFieldDetail, Collections.emptyMap());
                 }
             }
         }
@@ -75,16 +75,16 @@ public abstract class QueryBuilderAbstract<T> {
      *
      * @return
      */
-    private List<FieldDetails> getClassFieldDetails(Class aClass) {
+    private List<QueryFieldDetails> getClassFieldDetails(Class aClass) {
         if (FIELD_DETAILS_CACHE.containsKey(Object.class.getName())) {
             return FIELD_DETAILS_CACHE.get(Object.class.getName());
         }
         Map<Class<? extends Annotation>, QueryHandler<Object, T>> queryHandler = getQueryHandler();
         // 获取所有字段
         List<Field> fields = FieldUtils.scanFields(aClass);
-        List<FieldDetails> resList = new ArrayList<>();
+        List<QueryFieldDetails> resList = new ArrayList<>();
         for (Field field : fields) {
-            FieldDetails fieldDetails = new FieldDetails();
+            QueryFieldDetails fieldDetails = new QueryFieldDetails();
             // 属性名称
             fieldDetails.setFieldName(field.getName());
             // 扫描类属性及与构造查询条件相关注解信息
@@ -108,7 +108,7 @@ public abstract class QueryBuilderAbstract<T> {
      * @param queryParams
      * @return
      */
-    private List<FieldDetails> getClassFieldDetails(Object queryParams) {
+    private List<QueryFieldDetails> getClassFieldDetails(Object queryParams) {
         return getClassFieldDetails(queryParams.getClass());
     }
 

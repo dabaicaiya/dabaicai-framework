@@ -20,4 +20,12 @@ public class BeanUtils {
         }
     }
 
+    public static Class<?> getJdkTarget(Object proxy) {
+        Class<?>[] annotationInterfaces = proxy.getClass().getInterfaces();
+        if (annotationInterfaces.length == 0) {
+            return null;
+        }
+        return annotationInterfaces[0];
+    }
+
 }

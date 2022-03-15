@@ -2,10 +2,13 @@ package com.dabaicai.framework.orm.mybatis;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dabaicai.framework.orm.common.QueryBuilderAbstract;
+import com.dabaicai.framework.orm.common.QueryFieldDetails;
 import com.dabaicai.framework.orm.common.annotation.*;
 import com.dabaicai.framework.orm.common.handler.QueryHandler;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +27,7 @@ public class BatisQueryWrapper extends QueryBuilderAbstract<QueryWrapper> {
     /**
      * 处理器列表
      */
-    private List<QueryHandler<?, QueryWrapper>> handlers = Arrays.asList(
+    private List<QueryHandler<?, QueryWrapper<?>>> handlers = Arrays.asList(
             new EqualsHandler(),
             new GeHandler(),
             new GtHandler(),
@@ -35,7 +38,7 @@ public class BatisQueryWrapper extends QueryBuilderAbstract<QueryWrapper> {
 
     );
 
-    private Map<Class<?>, QueryHandler<?, QueryWrapper>> queryHandlerMap;
+    private Map<Class<?>, QueryHandler<?, QueryWrapper<?>>> queryHandlerMap;
     {
         queryHandlerMap = handlers.stream().collect(Collectors.toMap(QueryHandler::getQueryClass, e->e));
     }
@@ -46,11 +49,11 @@ public class BatisQueryWrapper extends QueryBuilderAbstract<QueryWrapper> {
     }
 }
 
-class EqualsHandler implements QueryHandler<Equals, QueryWrapper>{
+class EqualsHandler implements QueryHandler<Equals, QueryWrapper<?>>{
 
     @Override
-    public void handler(Equals equals, QueryWrapper queryWrapper, Object value, Map<Object, Object> params) {
-        queryWrapper.eq(equals.filedName(), value);
+    public void handler(Equals equals, QueryWrapper<?> queryWrapper,  Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params) {
+        queryWrapper.eq(FieldUtils.getFieldName(equals.filedName(), queryFieldDetails.getField()), queryFieldDetails.getFieldValue(queryParams));
     }
 
     @Override
@@ -59,11 +62,11 @@ class EqualsHandler implements QueryHandler<Equals, QueryWrapper>{
     }
 }
 
-class GeHandler implements QueryHandler<Ge, QueryWrapper>{
+class GeHandler implements QueryHandler<Ge, QueryWrapper<?>>{
 
     @Override
-    public void handler(Ge equals, QueryWrapper queryWrapper, Object value, Map<Object, Object> params) {
-        queryWrapper.ge(equals.filedName(), value);
+    public void handler(Ge ge, QueryWrapper<?> queryWrapper, Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params) {
+        queryWrapper.ge(FieldUtils.getFieldName(ge.filedName(), queryFieldDetails.getField()), queryFieldDetails.getFieldValue(queryParams));
     }
 
     @Override
@@ -72,11 +75,11 @@ class GeHandler implements QueryHandler<Ge, QueryWrapper>{
     }
 }
 
-class GtHandler implements QueryHandler<Gt, QueryWrapper>{
+class GtHandler implements QueryHandler<Gt, QueryWrapper<?>>{
 
     @Override
-    public void handler(Gt equals, QueryWrapper queryWrapper, Object value, Map<Object, Object> params) {
-        queryWrapper.gt(equals.filedName(), value);
+    public void handler(Gt gt, QueryWrapper<?> queryWrapper, Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params) {
+        queryWrapper.gt(FieldUtils.getFieldName(gt.filedName(), queryFieldDetails.getField()), queryFieldDetails.getFieldValue(queryParams));
     }
 
     @Override
@@ -85,11 +88,12 @@ class GtHandler implements QueryHandler<Gt, QueryWrapper>{
     }
 }
 
-class LeHandler implements QueryHandler<Le, QueryWrapper>{
+class LeHandler implements QueryHandler<Le, QueryWrapper<?>>{
 
     @Override
-    public void handler(Le equals, QueryWrapper queryWrapper, Object value, Map<Object, Object> params) {
-        queryWrapper.gt(equals.filedName(), value);
+    public void handler(Le le, QueryWrapper<?> queryWrapper, Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params) {
+        String fieldName = FieldUtils.getFieldName(le.filedName(), queryFieldDetails.getField());
+        queryWrapper.gt(fieldName, queryFieldDetails.getFieldValue(queryParams));
     }
 
     @Override
@@ -98,11 +102,12 @@ class LeHandler implements QueryHandler<Le, QueryWrapper>{
     }
 }
 
-class LikeHandler implements QueryHandler<Like, QueryWrapper>{
+class LikeHandler implements QueryHandler<Like, QueryWrapper<?>>{
 
     @Override
-    public void handler(Like equals, QueryWrapper queryWrapper, Object value, Map<Object, Object> params) {
-        queryWrapper.gt(equals.filedName(), value);
+    public void handler(Like like, QueryWrapper<?> queryWrapper, Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params) {
+        String fieldName = FieldUtils.getFieldName(like.filedName(), queryFieldDetails.getField());
+        queryWrapper.likeLeft(fieldName, queryFieldDetails.getFieldValue(queryParams));
     }
 
     @Override
@@ -111,11 +116,12 @@ class LikeHandler implements QueryHandler<Like, QueryWrapper>{
     }
 }
 
-class LtHandler implements QueryHandler<Lt, QueryWrapper>{
+class LtHandler implements QueryHandler<Lt, QueryWrapper<?>>{
+
 
     @Override
-    public void handler(Lt equals, QueryWrapper queryWrapper, Object value, Map<Object, Object> params) {
-        queryWrapper.gt(equals.filedName(), value);
+    public void handler(Lt lt, QueryWrapper<?> queryWrapper, Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params) {
+        queryWrapper.gt(FieldUtils.getFieldName(lt.filedName(), queryFieldDetails.getField()), queryFieldDetails.getFieldValue(queryParams));
     }
 
     @Override
@@ -124,15 +130,28 @@ class LtHandler implements QueryHandler<Lt, QueryWrapper>{
     }
 }
 
-class NeHandler implements QueryHandler<Ne, QueryWrapper>{
+class NeHandler implements QueryHandler<Ne, QueryWrapper<?>>{
+
+
 
     @Override
-    public void handler(Ne equals, QueryWrapper queryWrapper, Object value, Map<Object, Object> params) {
-        queryWrapper.gt(equals.filedName(), value);
+    public void handler(Ne ne, QueryWrapper<?> queryWrapper,  Object queryParams, QueryFieldDetails queryFieldDetails, Map<Object, Object> params) {
+        queryWrapper.ne(FieldUtils.getFieldName(ne.filedName(), queryFieldDetails.getField()), queryFieldDetails.getFieldValue(queryParams));
     }
 
     @Override
     public Class<Ne> getQueryClass() {
         return Ne.class;
     }
+}
+
+class FieldUtils {
+
+    public static String getFieldName(String fieldName, Field field) {
+        if (!StringUtils.isEmpty(fieldName)) {
+            return fieldName;
+        }
+        return com.dabaicai.framework.common.utils.StringUtils.camelToUnderline(field.getName());
+    }
+
 }
