@@ -50,7 +50,8 @@ public class ListUtils {
     public static <T> void batchListPool(List<T> list, int batchNum, int threadPoolSize, Consumer<List<T>> consumer) {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(threadPoolSize, threadPoolSize, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(threadPoolSize));
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        batchList(list, batchNum, consumer);
+        // 使用线程池操作
+        batchList(list, batchNum, e-> threadPoolExecutor.execute(()-> consumer.accept(e)));
         threadPoolExecutor.shutdown();
         try {
             // 等待所有线程执行完毕

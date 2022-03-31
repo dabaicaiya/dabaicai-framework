@@ -27,7 +27,7 @@ public class BatisQueryWrapper extends QueryBuilderAbstract<QueryWrapper> {
     /**
      * 处理器列表
      */
-    private List<QueryHandler<?, QueryWrapper<?>>> handlers = Arrays.asList(
+    private final List<QueryHandler<?, QueryWrapper<?>>> handlers = Arrays.asList(
             new EqualsHandler(),
             new GeHandler(),
             new GtHandler(),
@@ -38,10 +38,9 @@ public class BatisQueryWrapper extends QueryBuilderAbstract<QueryWrapper> {
 
     );
 
-    private Map<Class<?>, QueryHandler<?, QueryWrapper<?>>> queryHandlerMap;
-    {
-        queryHandlerMap = handlers.stream().collect(Collectors.toMap(QueryHandler::getQueryClass, e->e));
-    }
+    private final Map<Class<?>, QueryHandler<?, QueryWrapper<?>>> queryHandlerMap =
+            handlers.stream().collect(Collectors.toMap(QueryHandler::getQueryClass, e->e));
+
 
     @Override
     public <T> Map<Class<? extends Annotation>, QueryHandler<T, QueryWrapper>> getQueryHandler() {
